@@ -6,11 +6,14 @@ The idea is to have one source for the document and when a change is made be abl
 
 This is for academic articles or dissertations.  It's limited in scope fiction books.  The supported markdown will be extremely limited.  At first probably to:
 
-* headers
+* headers (atx style (1-6 #))
 * span emphasis (italics, bold, etc)
+* Links (inline definition only)
+
+Lists are a likely additionm but not part of MVP.
 
 Charactes that will need special thought about how to represent them in the source material or during the automation/transformation process:
 
-* html: >, &
+* html: <, &
 * markdown: 
-* latex: %
+* latex: %, \, $
