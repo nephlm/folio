@@ -16,4 +16,4 @@ Charactes that will need special thought about how to represent them in the sour
 
 * html: <, &
 * markdown: 
-* latex: %, \, $
+* latex: $ % # _ ^ & ~ \ { } and sometimes [ ]
