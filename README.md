@@ -4,12 +4,26 @@ An automation system to convert a set of files constructed from a subset of mark
 
 The idea is to have one source for the document and when a change is made be able to generate both the ebook and print book from the same source without having to do any fiddling.
 
-This is for academic articles or dissertations.  It's limited in scope fiction books.  The supported markdown will be extremely limited.  At first probably to:
+This is no for academic articles or dissertations.  It's limited in scope popular fiction books.  
+
+## Considerations
+
+Desing goals and considerations for this project. 
+
+### Supported Markdown
+
+The supported markdown will be extremely limited.  At first probably limited to:
 
 * headers (atx style (1-6 #))
 * span emphasis (italics, bold, etc)
-* ~~Links (inline definition only; Do I need this?  This is for making PDF to send to POD services, by definition it won't be clickable.  I guess it will create A PDF, but that isn't use case we're trying to solve for.  Definitely not part of MVP.)~~
+* Links 
+    * Inline definition only 
+    * Do I need this?  This is for making PDF to send to POD services, by definition it won't be clickable.  I guess it will create a clickable link in a PDF, but that isn't use case we're trying to solve for.  
+    * However ultimately we'd like one build system that will build the POD pdf as well as the .mobi (epub, etc) ebook and those will have clickable links.
 * Lists are a likely addition but not part of MVP.
+* block quotes are also likely additions, but not part of the initial MVP.
+
+### Special Characters
 
 Characters that will need special thought about how to represent them in the source material or during the automation/transformation process:
 
@@ -27,7 +41,7 @@ This list will likely grow.
 
 ## Components
 
-* *File Collector*: Collect the .md files that are part of the book.  Process and assemble them into a single .md file.
+* *Assembler*: Collect the .md files that are part of the book.  Process and assemble them into a single .md file.
     * Will include some header re-writing.  Ideally there will be an .md file parser library, but it might be done with simple regexes instead.  
     * Inserting file level metadata at the point where files are joined. (see below) This will inserted as LaTeX comments so it should be ignored.
     * `<!--SCENE-->` will also be added at each file join point.

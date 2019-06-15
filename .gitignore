@@ -102,3 +102,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+*.code-workspace
+*.aux
+*.dvi
+*.pdf  # This might change, but for now.
