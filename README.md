@@ -31,6 +31,13 @@ Characters that will need special thought about how to represent them in the sou
 * markdown: 
 * latex: $ % # _ ^ & ~ \ { } and sometimes [ ]
 
+I thik we can start folio commands with `;;` at the start of the line.  Any foio list commands will be additive single lines.
+
+```
+;; credit "Cover design" "Joe Artist" "https://joeartist.com"
+;; credit "Interior design" "Folio"  "https://nephlm.github.com/folio"
+```
+
 ## Requirements
 
 This list will likely grow.
@@ -39,57 +46,130 @@ This list will likely grow.
 * The ability run python.
     * This probably effectively means a linux environment (Mac?).  I hear the Windows 10 will start shipping with linux soon, but I don't know what that means.
 
+## Supported Grammar
+
+The starting point is markdown so it should be familiar with markdown.  However it will be a stripped down version of markdown, certainly for MVP.  However there are required features not supported by markdown.  As I use [tiddlywiki](https://tiddlywiki.com/), their markdown inspired [WikiText](https://tiddlywiki.com/static/WikiText.html) will be my goto source for grammar extensions.
+
+### Inline Grammars
+
+Inline grammars don't span paragraphs or other block elements.
+
+* emphasis - Rendered as italics.  (Some \**emphasized*\* text).  Underscores can also be used.
+* strong - Rendered as bold.  (Some \*\***bolded**\*\* text).  Underscores can also be used.
+* inline comments - Not rendered.  (Some <!-- commented --> text). 
+    * (Some &lt;!-- commented --> text)
+* strikethrough - I'm a fan of this being a first class formatting, but I'm not sure it  has much purpose in this context.  Some ~~strikethrough~~ text.
+* monospace - Rendered in a monospace font (some `monospace` text)  
+* superscript - I feel like these should be included but are not part of stock markdown.  If we were rendering to HTML we could just use &lt;sup> or &lt;sub>, but we aren't.  WikiText uses ^^superscript^^ and ,,subscript,,.
+* subscript - See superscript above.
+* emdash - -- will be rendered as an emdash
+* quotes - Straight quotes will be rendered as typographical quotes.
+* ellipses - Three periods will be rendered as typographical ellipses
+
+### Block Grammars
+
+* Paragraph - The paragraph is the basic block in folio.  Paragraphs are separated by one or more empty lines.  Empty lines are any line containing only zero or more whitespace characters.
+* Blockquotes - Blockquotes begin with a line a line beginning with three &lt; and end with another line beginning with three &lt;.
+    * class - Immediately following the &lt;&lt;&lt; a class can be added.  This is generally for a special block quote that is to be used in frontmatter of a chapter header. 
+        * Currently defined special classes:
+            * epigram - If defined as part of front matter will be put on it's own page in the front matter.  If part of a chapter head, will be put there, otherwise it's ignored.
+    * source - Any text on the closing &lt;&lt;&lt; line will be interpreted as the source for the blockquote or epigram and will be rendered as such. 
+* bookfrontmatter - 
+* chapterfrontmatter - 
+
+### For Later
+
+* Lists
+
+### For Never (Probably)
+
+* Tables
+
 ## Components
 
-* *Assembler*: Collect the .md files that are part of the book.  Process and assemble them into a single .md file.
-    * Will include some header re-writing.  Ideally there will be an .md file parser library, but it might be done with simple regexes instead.  
-    * Inserting file level metadata at the point where files are joined. (see below) This will inserted as LaTeX comments so it should be ignored.
-    * `<!--SCENE-->` will also be added at each file join point.
+The parser/renderer architecture can hopefully be built on top of the [mistune](https://github.com/lepture/mistune) markdown parser.  It will likely have to be heavily modified (hopefully as a subclass, rather than a fork) to deal with the above grammar.
+
+* *Parser*: Collect the .md files that are part of the book.  
+    * Ordering of files
+        * In general alphabetical of full path.
+        * `Frontmatter.md` and `Backmatter.md` move to the front or end of the order on a per directory basis. 
+    * Can I process each file individually or do they have to be assembled first?
+        * Really try to treat them as separate.
+    * Will include some header re-writing.  
     * Files do not need to contain text, they may be all metadata. For example there might be a book or section level metadata file, that contains no prose.
-* *Translator*: Take the output of File Collector and translate it into LaTex.
-    * Find LaTeX reserved/special characters and escape them.
-    * Apply appropriate latex commands to create emphasis, et al.  
-    * Construct front matter and chapter headers.
-    * Output the LaTeX source.
+* *Renderer*: 
+    * Should be module enough so we can also make both a LaTeX and ebook renderer
+    * LaTeX
+        * Take the output of File Parser and render it into LaTex.
+        * Find LaTeX reserved/special characters and escape them.
+        * Apply appropriate latex commands to create emphasis, et al.  
+        * Construct front matter and chapter headers.
+        * Output the LaTeX source.
+    * Mobi, epub, etc.
 * *Control*
-    * Will run the above two components as well as the LaTeX command to compile into a PDF file. 
+    * Will run the above two components as well as the LaTeX command to compile into a PDF or ebook file. 
 
 ## Metadata
 
-Matched braces inside an html comment (&lt;!--{}--&gt;) will be interpreted as json metadata.
+Folio commands begin with `;;` at the beginning of the line.  All parts of the command must be on a single line. 
 
-Maybe instead of JSON have this be lines starting with LaTeX comment character (%)  with a form:
+### Commands
+
+Commands are generally removed or transformed before LaTeX generation.  
+
+#### scope
+
+Basically the same as the set, but elevated due to importance.
+
+defaults to 'scene', but can also be set to 'book', 'section' or 'chapter'.  Files are assumed to be individual scenes.  A section is a collection of chapters within one physical book.  These are often confusingly called books.  MVP likely will not deal with sections.
+
 ```
-% key: value
-```
-Would not handle nesting well at all.  Probably fine for most usages, but would break down at the book level without some sort of compound keys.
-
-```
-% credit_1: cover design; Joe Artist; joeartist.com
+;; scope chapter
 ```
 
-Pretty unfriendly, but then so is JSON for this sort of thing if you're hand typing it.
+#### set
 
-### Meta data elements.
+```
+;; set title "Great American Novel"
+```
 
-* **scope**: defaults to 'scene', but can also be set to 'book', 'section' or 'chapter'.  Files are assumed to be individual scenes.  A section is a collection of chapters within one physical book.  These are often confusingly called books.  MVP likely will not 
+Values that can be set.  Set always overwrites a previous value.  
+
 * **h1_scale_offset**: This how many levels each heading should be shifted down.  If this is set to 2, than an H1 will become an H3 and a H3 will become an H5.  By default if the scope is 'book' this is set to 0, 'section' sets this to 1, 'chapter' sets it to 2 and 'scene' sets it to 3.  This allows each file to be normally scoped with the highest level heading (H1), but the compiled document has a consistent hierarchy.  
 * **author**: The name of the author of the scoped work.
 * **title**: 
     * If there is a top level (H1) header, will use the content of the that.
     * If no H1 defaults to the name of the file, with .md extension removed.  If there is a __ in the filename, whatever precedes the __ will be dropped.  This allows files to be ordered by what precedes the the __ and can still extract the section title that should be used.
 * **subtitle**: Subtitle of the section.  (Should it be extracted from H2?)
-* **epigraph**: Extract from H3?  JSON multiline is not super author friendly.  Needs more though.
-* Book level only: The following metadata is only valid at book scope.  It will be ignored at other scopes.
-    * publisher
-    * publisher_url
-    * ISBN: Can be a string or a dict with edition names (ebook, paperback, etc) as keys.
-    * copyright_holder: defaults to author.
-    * copyright_year: defaults to the current year.
-    * disclaimer: path to a text or md file.  Overrides default on copyright page.
-    * rights path to a text or md file.  Overrides default on copyright page.
-    * title_page: I don't know what to do about this.  For the moment this is a place holder for future development.  Maybe links to some images or something. 
+* **epigraph**: Extract from H3?  Command multiline doesn't exist.  How do you know when H3 ends?  Epigraph as custom style?  That would solve a lot of the problems.  Would have a start/end and wouldn't make headings semantic.
+
+Values that should probably only be set once.
+
+* publisher
+* publisher_url
+* copyright_holder: defaults to author.
+* copyright_year: defaults to the current year.
+* disclaimer: path to a text or md file.  Overrides default on copyright page.
+* rights path to a text or md file.  Overrides default on copyright page.
+* title_page: I don't know what to do about this.  For the moment this is a place holder for future development.  Maybe links to some images or something. 
+
+Unknown values will be silently processed.  
+
+#### lists
+
+Stores a list of tupeles.
+
+```
+;; list credits "Cover design" "Joe Artist" "https://joeartist.com"
+;; list credits "Interior art: "Jane Artist" "https://janeartist.com"
+;; list ISBN paperback "bunch of nubmers" 
+;; list ISBN ebook "bunch of nubmers" 
+```
+
+Tuple names known by folio:
+
     * credits: A list of tuples `(thing, person, url)`.  For example `[['cover design', 'Joe Artist', 'joeswebsite.com']]`.  You can even thank me.
+    * ISBN: Can be a string or a dict with edition names (ebook, paperback, etc) as keys.
 
 Title pages can be arbitrarily complicated and I don't have the required metadata so support a flexible solution except for having the author write LaTex (no.)  Think more about this issue.
 
