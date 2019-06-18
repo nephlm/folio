@@ -74,8 +74,168 @@ Inline grammars don't span paragraphs or other block elements.
         * Currently defined special classes:
             * epigram - If defined as part of front matter will be put on it's own page in the front matter.  If part of a chapter head, will be put there, otherwise it's ignored.
     * source - Any text on the closing &lt;&lt;&lt; line will be interpreted as the source for the blockquote or epigram and will be rendered as such. 
-* bookfrontmatter - 
-* chapterfrontmatter - 
+* TitlePages - Title pages can be arbitrarily complicated and I don't have the required metadata so support a flexible solution except for having the author write LaTex (no.)  Think more about this issue.
+
+
+
+
+
+### Book Structures
+
+Folio recognizes three levels of hierarchy in a book.
+
+* Book - A single physical book.
+* Section - A group of chapters.   Won't likely be supported by MVP.
+    * These are often used to designate a large passage of time between parts of the novel.
+    * 
+* Chapter - A group of scenes.
+
+To start these structures a structure block needs to be created which instructs Folio to render the appropriate beginning.  Each block requires certain metadata about the structure.
+
+The start structure block begins and ends with `@@`.  After the starting `@@` a marker designating what sort of section should be started is required.  This means the starting marker will be one of these three:
+
+* `@@.book`
+* `@@.section`
+* `@@.chapter`
+
+Regardless of how it starts it ends with an `@@`.  The starting and ending markers should be on line by themselves with no spaces before them.
+
+Between the start and end marker are mostly data declarations.  Declarations begin with `;;` and are of the form `;;key=value`.  They are one per line with no spaces before the `;;`  The value may have spaces but no multiline values.  
+
+There are some keys which may contain multiple values (ISBN, credits, etc), in such case they are designated as `;;key['selector'] = value`
+
+Multiline data bay also be entered in form of a named blockquote (see above).
+
+```
+<<<.epigraph
+Line1
+Line2
+<<<
+```
+
+Folio will interpret that as something similar to `;;epigraph=Line1\nLine2`.  Be aware that there are limited fields that will accept multiline data.  Unless specified otherwise assume multiline data will not be accepted. 
+
+#### Book
+
+A book is started by a book start structure.  
+
+The book structure bock will use the following data declarations:
+
+* title
+* subtitle
+* author
+* epigraph - multiline
+* publisher
+* publisher_url
+* copyright_holder: defaults to author.
+* copyright_year: defaults to the current year.
+* disclaimer: Multiline and optional.  Overrides default on copyright page.
+* rights: Multiline and optional.  Overrides default on copyright page.
+* title_page: I don't know what to do about this.  For the moment this is a place holder for future development.  Title pages are arbitrarily complicated.  We'll have to figure something out as we go.
+* credits: Multivalue and optional.  
+* isbn: Multivalue and optional.
+
+A minimal book start structure looks like this:
+
+```
+@@.book
+;;title=My Awesome book
+;;author=Nephlm Smith
+@@
+```
+In general publisher data is highly recommended.
+
+#### Section
+
+A section is started by a section start structure.  At present this does not render as anything.
+
+Sections support the following data declarations:
+
+* title
+* subtitle
+* epigraph
+
+Minimal section start declaration looks like this:
+
+```
+@@.section
+;;title=Before the War
+@@
+```
+
+#### Chapter
+
+A section is started by a section start structure.  At present this does not render as anything.
+
+Sections support the following data declarations:
+
+* title
+* subtitle
+* epigraph
+
+Minimal section start declaration looks like this:
+
+```
+@@.chapter
+;;title=Before the War
+@@
+```
+
+Chapters have a special shortcut if there is no subtitle or epigraph.  Any H1 header will be considered to a chapter start with the value of the heading equal to the header text.
+
+The below is equivalent to the above minimal example. 
+
+```
+# Before the War
+```
+
+
+
+
+#### Simplified Complete Book Example
+
+```
+
+@@.book
+;;title=Title of the Book
+;;subtitle=It's Awesome, Buy It!
+;;author=Joe author
+;;isbn["ebook"] = <bunch of numbers>
+;;credits['Cover design']=Joe Artist
+;;credit_urls['Cover design]=https://joeartist.com
+@@
+
+@@.section
+;;title = Title of the section
+@@
+
+# Chapter 1
+
+Lorem Ipsum etc etc ...
+
+@@.chapter
+;;title=Chapter 2
+;;subtitle=The Sub-Title of the Chapter
+
+<<<.epigraph
+In the beginning there was stuff
+<<< someone else
+
+
+<!--.notes
+Notes about what happen in the chapter
+-->
+@@
+
+Lorem Ipsum etc etc ...
+
+@@.backmatter
+<<<.about_the_author
+Stuff about me
+<<<
+@@
+```
+
 
 ### For Later
 
@@ -108,68 +268,4 @@ The parser/renderer architecture can hopefully be built on top of the [mistune](
     * Mobi, epub, etc.
 * *Control*
     * Will run the above two components as well as the LaTeX command to compile into a PDF or ebook file. 
-
-## Metadata
-
-Folio commands begin with `;;` at the beginning of the line.  All parts of the command must be on a single line. 
-
-### Commands
-
-Commands are generally removed or transformed before LaTeX generation.  
-
-#### scope
-
-Basically the same as the set, but elevated due to importance.
-
-defaults to 'scene', but can also be set to 'book', 'section' or 'chapter'.  Files are assumed to be individual scenes.  A section is a collection of chapters within one physical book.  These are often confusingly called books.  MVP likely will not deal with sections.
-
-```
-;; scope chapter
-```
-
-#### set
-
-```
-;; set title "Great American Novel"
-```
-
-Values that can be set.  Set always overwrites a previous value.  
-
-* **h1_scale_offset**: This how many levels each heading should be shifted down.  If this is set to 2, than an H1 will become an H3 and a H3 will become an H5.  By default if the scope is 'book' this is set to 0, 'section' sets this to 1, 'chapter' sets it to 2 and 'scene' sets it to 3.  This allows each file to be normally scoped with the highest level heading (H1), but the compiled document has a consistent hierarchy.  
-* **author**: The name of the author of the scoped work.
-* **title**: 
-    * If there is a top level (H1) header, will use the content of the that.
-    * If no H1 defaults to the name of the file, with .md extension removed.  If there is a __ in the filename, whatever precedes the __ will be dropped.  This allows files to be ordered by what precedes the the __ and can still extract the section title that should be used.
-* **subtitle**: Subtitle of the section.  (Should it be extracted from H2?)
-* **epigraph**: Extract from H3?  Command multiline doesn't exist.  How do you know when H3 ends?  Epigraph as custom style?  That would solve a lot of the problems.  Would have a start/end and wouldn't make headings semantic.
-
-Values that should probably only be set once.
-
-* publisher
-* publisher_url
-* copyright_holder: defaults to author.
-* copyright_year: defaults to the current year.
-* disclaimer: path to a text or md file.  Overrides default on copyright page.
-* rights path to a text or md file.  Overrides default on copyright page.
-* title_page: I don't know what to do about this.  For the moment this is a place holder for future development.  Maybe links to some images or something. 
-
-Unknown values will be silently processed.  
-
-#### lists
-
-Stores a list of tupeles.
-
-```
-;; list credits "Cover design" "Joe Artist" "https://joeartist.com"
-;; list credits "Interior art: "Jane Artist" "https://janeartist.com"
-;; list ISBN paperback "bunch of nubmers" 
-;; list ISBN ebook "bunch of nubmers" 
-```
-
-Tuple names known by folio:
-
-    * credits: A list of tuples `(thing, person, url)`.  For example `[['cover design', 'Joe Artist', 'joeswebsite.com']]`.  You can even thank me.
-    * ISBN: Can be a string or a dict with edition names (ebook, paperback, etc) as keys.
-
-Title pages can be arbitrarily complicated and I don't have the required metadata so support a flexible solution except for having the author write LaTex (no.)  Think more about this issue.
 
