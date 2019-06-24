@@ -8,20 +8,24 @@ This is no for academic articles or dissertations.  It's limited in scope popula
 
 ## Considerations
 
-Desing goals and considerations for this project. 
+Design goals and considerations for this project. 
 
 ### Supported Markdown
 
 The supported markdown will be extremely limited.  At first probably limited to:
 
 * headers (atx style (1-6 #))
-* span emphasis (italics, bold, etc)
+* span emphasis (italics, bold, strikethrough, inline comments, super and sub script, etc)
+* typographical transformation
+    * quotes
+    * mdash
+    * ellipses
 * Links 
     * Inline definition only 
     * Do I need this?  This is for making PDF to send to POD services, by definition it won't be clickable.  I guess it will create a clickable link in a PDF, but that isn't use case we're trying to solve for.  
     * However ultimately we'd like one build system that will build the POD pdf as well as the .mobi (epub, etc) ebook and those will have clickable links.
+* block quotes.
 * Lists are a likely addition but not part of MVP.
-* block quotes are also likely additions, but not part of the initial MVP.
 
 ### Special Characters
 
@@ -31,12 +35,6 @@ Characters that will need special thought about how to represent them in the sou
 * markdown: 
 * latex: $ % # _ ^ & ~ \ { } and sometimes [ ]
 
-I thik we can start folio commands with `;;` at the start of the line.  Any foio list commands will be additive single lines.
-
-```
-;; credit "Cover design" "Joe Artist" "https://joeartist.com"
-;; credit "Interior design" "Folio"  "https://nephlm.github.com/folio"
-```
 
 ## Requirements
 
