@@ -20,12 +20,14 @@ class FolioBlockLexer(mistune.BlockLexer):
         self._in_block_fence = False
 
     def parse_block_fence(self, m):
+        name = m.group(1) if m.group(1) else None
+        print(name)
         if  self._in_block_fence:
             self._in_block_fence = False
             self._blockquote_depth -= 1
             self.tokens.append({'type': 'block_quote_end'})
         else:
-            self.tokens.append({'type': 'block_quote_start'})
+            self.tokens.append({'type': 'block_quote_start', 'name': name})
             self._blockquote_depth += 1
             self._in_block_fence = True
 

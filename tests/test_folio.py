@@ -16,12 +16,12 @@ def test_tokenize():
 
 
 def test_tokenize_fence_block():
-    text = "par1\n\n>>>.epilog\nquote par 1\n\n quote par2\n>>>\n\n par 2\n\n"
+    text = "par1\n\n>>>.epilogue\nquote par 1\n\n quote par2\n>>>\n\n par 2\n\n"
     tokens = fol.Folio().tokenize(text)
     print(tokens)
     assert tokens == [
         {'type': 'paragraph', 'text': 'par1'}, 
-        {'type': 'block_quote_start'}, 
+        {'type': 'block_quote_start', 'name': '.epilogue'}, 
         {'type': 'paragraph', 'text': 'quote par 1'}, 
         {'type': 'paragraph', 'text': ' quote par2'}, 
         {'type': 'block_quote_end'}, 
