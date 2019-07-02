@@ -107,3 +107,4 @@ venv.bak/
 *.aux
 *.dvi
 *.pdf  # This might change, but for now.
+.vscode/settings.json
