@@ -10,6 +10,7 @@ class FolioBlockGrammar(mistune.BlockGrammar):
 
     block_fence = re.compile(r'^>>>(\..*)?\n')
     section_fence = re.compile(r'^@@(\..*)?\n')
+    metadata = re.compile(r'^;;\s*(\w+)\s*=\s*(.+)')
 
 class FolioBlockLexer(mistune.BlockLexer):
 
@@ -18,6 +19,7 @@ class FolioBlockLexer(mistune.BlockLexer):
     def __init__(self, rules=None, **kwargs):
         self.default_rules.insert(4, 'block_fence')
         self.default_rules.insert(5, 'section_fence')
+        self.default_rules.insert(6, 'metadata')
         super().__init__(rules, **kwargs)
         self._in_block_fence = False
         self._in_section_fence = False
@@ -42,6 +44,11 @@ class FolioBlockLexer(mistune.BlockLexer):
         else:
             self.tokens.append({'type': 'section_header_start', 'level': name})
             self._in_section_fence = True
+
+    def parse_metadata(self, m):
+        key = m.group(1)
+        val = m.group(2)
+        self.tokens.append({'type': 'metadata', 'key': key, 'val': val})
 
 class Folio(mistune.Markdown):
 
