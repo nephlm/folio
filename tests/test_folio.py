@@ -66,6 +66,17 @@ def test_fence_block_regex(text, style):
     assert m.group(0) == f'>>>{style if style else ""}\n'
     assert m.group(1) == style
 
+@pytest.mark.parametrize('text', [
+    "Some words\n'''a comment '''\n\n more words",
+    "Some words\n'''\na comment \n'''\n\n more words",
+])
+def test_block_comment_regex(text):
+    pattern = fol.FolioBlockGrammar.block_comment_fence
+    m = pattern.match(text)
+    assert m.groups() == ('foo',)
+    assert m.group(0) == f'>>>\n'
+
+
 @pytest.mark.skip(reason="not yet")
 def test_inline():
     text = "A paragraph with *emphasized* text."

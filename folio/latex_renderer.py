@@ -10,9 +10,9 @@ class Renderer(object):
     """The default HTML renderer for rendering Markdown.
     """
 
-    def __init__(self, title, author, **kwargs):
-        self.title = title
-        self.author = author
+    def __init__(self, **kwargs):
+        self.title = None
+        self.author = None
         self.options = kwargs
         self.metadata = {'.book': {}, '.section': {}, '.chapter': {}}
         self.section_number = 0
@@ -46,7 +46,7 @@ class Renderer(object):
         represent the document (which can then be reprocessed later into a
         separate format like docx or pdf).
         """
-        return []
+        return ''
 
     def block_code(self, code, lang=None):
         """Rendering block level code. ``pre > code``.
@@ -83,8 +83,16 @@ class Renderer(object):
         :param level: a number for the header level, for example: 1.
         :param raw: raw text content of the header.
         """
-        raise NotImplementedError('not implemented yet')
-        return '<h%d>%s</h%d>\n' % (level, text, level)
+        if self.chapter_number == 0:
+            chapter_start = '\\cleartorecto\n\n'
+        else:
+            chapter_start = '\\clearpage\n\n'
+        self.chapter_number +=1
+        chapter_start += '\\begin{ChapterStrart}\n'
+        chapter_start += '\\vspace{2\\nbs}\n'
+        chapter_start += '\\ChapterTitle{%s}\n' % text  
+        chapter_start += '\\end{ChapterStart}\n\n'
+        return chapter_start
 
     def hrule(self):
         """Rendering method for ``<hr>`` tag."""
@@ -112,8 +120,7 @@ class Renderer(object):
 
     def paragraph(self, text):
         """Rendering paragraph tags. Like ``<p>``."""
-        raise NotImplementedError('not implemented yet')
-        return '<p>%s</p>\n' % text.strip(' ')
+        return '%s\n\n' % text.strip(' ')
 
     def table(self, header, body):
         """Rendering table element. Wrap header and body in it.
@@ -199,9 +206,6 @@ class Renderer(object):
 
         :param text: text content.
         """
-        raise NotImplementedError('not implemented yet')
-        if self.options.get('parse_block_html'):
-            return text
         return escape(text)
 
     def escape(self, text):
@@ -209,7 +213,6 @@ class Renderer(object):
 
         :param text: text content.
         """
-        raise NotImplementedError('not implemented yet')
         return escape(text)
 
     def autolink(self, link, is_email=False):

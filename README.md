@@ -4,7 +4,7 @@ An automation system to convert a set of files constructed from a subset of mark
 
 The idea is to have one source for the document and when a change is made be able to generate both the ebook and print book from the same source without having to do any fiddling.
 
-This is no for academic articles or dissertations.  It's limited in scope popular fiction books.  
+This is not for academic articles or dissertations.  It's limited in scope to popular fiction books.  
 
 ## Considerations
 
@@ -43,10 +43,12 @@ This list will likely grow.
 * This is built on top of the LaTeX novel package, so it's required as well as a version of LaTeX that can run it (2016+).
 * The ability run python.
     * This probably effectively means a linux environment (Mac?).  I hear the Windows 10 will start shipping with linux soon, but I don't know what that means.
+* [Mistune](https://github.com/lepture/mistune)
+    * mistune==0.8.4
 
 ## Supported Grammar
 
-The starting point is markdown so it should be familiar with markdown.  However it will be a stripped down version of markdown, certainly for MVP.  However there are required features not supported by markdown.  As I use [tiddlywiki](https://tiddlywiki.com/), their markdown inspired [WikiText](https://tiddlywiki.com/static/WikiText.html) will be my goto source for grammar extensions.
+The starting point is markdown so it should be similar to markdown.  However it will be a stripped down version of markdown, certainly for MVP.  However there are required features not supported by markdown.  As I use [tiddlywiki](https://tiddlywiki.com/), their markdown inspired [WikiText](https://tiddlywiki.com/static/WikiText.html) will be my goto source for grammar extensions.
 
 ### Inline Grammars
 
@@ -54,7 +56,8 @@ Inline grammars don't span paragraphs or other block elements.
 
 * emphasis - Rendered as italics.  (Some \**emphasized*\* text).  Underscores can also be used.
 * strong - Rendered as bold.  (Some \*\***bolded**\*\* text).  Underscores can also be used.
-* inline comments - Not rendered.  (Some <!-- commented --> text). 
+* inline comments - Not rendered.  (Some <!-- commented --> text).
+    * this is an inline structure.  This will not work to comment out multiple paragraphs.  See block comments below for how to contain more extensive non-rendering notes in a file. 
     * (Some &lt;!-- commented --> text)
 * strikethrough - I'm a fan of this being a first class formatting, but I'm not sure it  has much purpose in this context.  Some ~~strikethrough~~ text.
 * monospace - Rendered in a monospace font (some `monospace` text)  
@@ -73,6 +76,7 @@ Inline grammars don't span paragraphs or other block elements.
             * epigram - If defined as part of front matter will be put on it's own page in the front matter.  If part of a chapter head, will be put there, otherwise it's ignored.
     * source - Any text on the closing &lt;&lt;&lt; line will be interpreted as the source for the blockquote or epigram and will be rendered as such. 
 * TitlePages - Title pages can be arbitrarily complicated and I don't have the required metadata so support a flexible solution except for having the author write LaTex (no.)  Think more about this issue.
+* Block Comments - The python style docstring (starts and ends with ''') will be supported to allow larger comments/synopsis/etc.  These will be dropped in the parsing stage and won't be rendered.
 
 
 

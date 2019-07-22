@@ -1,3 +1,7 @@
+'''
+Notes about what this chapter is about
+'''
+
 # Chapter 1
 
 %%%%%%%% c1 %%%%%%%%%%%
